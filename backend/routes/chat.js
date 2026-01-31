@@ -136,8 +136,8 @@ const token=jwt.sign(
 
 res.cookie("token", token, {
     httpOnly: true,     
-    secure: false,      
-    sameSite: "strict",
+    secure: true,      
+    sameSite: "none",
     maxAge: 24 * 60 * 60 * 1000
   });
 
@@ -163,7 +163,7 @@ res.status(500).message("Invalid Token")
 router.post("/logout",(req,res)=>{
     res.clearCookie("token", {
     httpOnly: true,
-    sameSite: "strict",
+    sameSite: "none",
   });
 
   res.json({ message: "Logged out successfully" });

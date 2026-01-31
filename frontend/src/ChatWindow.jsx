@@ -34,6 +34,7 @@ function ChatWindow(){
    }
 
     const getReply=async ()=>{
+        if (!prompt.trim()) return;
         if(!user){
             showToast("Please login your account","error")
             setAuth("login");
@@ -82,12 +83,14 @@ if (res.thread) {
 }catch(err){
     console.log(err);
     showToast(err.message||"Something went wrong","error");
+}finally{
+setLoading(false);
 }
-setLoading(false)
     }
 
     useEffect(()=>{
 if(prompt && reply){
+    if (!reply) return;
 setPrevChat(prevChat=>(
     [...prevChat,{
         role:"user",
@@ -280,7 +283,7 @@ auth==="login" &&
 <input placeholder="Ask Anything" value={prompt} 
 onChange={(e)=>setPrompt(e.target.value)}
 onKeyDown={(e) => {
-  if (e.key === "Enter") {
+  if (e.key === "Enter"&& window.innerWidth > 768) {
     e.preventDefault();
     getReply();
   }

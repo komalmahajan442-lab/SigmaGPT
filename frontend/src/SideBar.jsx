@@ -5,7 +5,7 @@ import { MyContext } from "./MyContext";
 import {v1 as uuidv1} from "uuid";
 
 function SideBar(){
-    const {allThreads,setAllThreads,currThreadId,setNewChat,setPrompt,setReply,setPrevChat,setCurrentThreadId,showHistory,user}=useContext(MyContext);
+    const {allThreads,setAllThreads,currThreadId,setNewChat,setPrompt,setReply,setPrevChat,setCurrentThreadId,showHistory,user,showToast}=useContext(MyContext);
 
     const getAllThreads=async()=>{
         try{
@@ -19,6 +19,7 @@ const filteredData=res.map((thread)=>({threadId:thread.threadId,title:thread.tit
 setAllThreads(filteredData);
         }catch(err){
             console.log(err);
+           
         }
 
     }
@@ -43,6 +44,9 @@ const response=await fetch(`http://localhost:8080/api/thread/${newthreadId}`,{
 );
 console.log(response);
 const res=await response.json();
+if(!response.ok){
+    showToast(res.message||"error");
+}
 console.log("res"+res);
 setPrevChat(res);
 setNewChat(false);
@@ -50,6 +54,7 @@ setReply(null);
 
         }catch(err){
 console.log(err);
+showToast(err.message,"error");
         }
     }
 
@@ -57,11 +62,18 @@ console.log(err);
 
 try{
 const response=await fetch(`http://localhost:8080/api/thread/${deleteThreadId}`,{method:"DELETE",credentials:"include"});
+const data=await response.json();
 
 setAllThreads(prev=>prev.filter(thread=>thread.threadId!==deleteThread));
 
 if(deleteThreadId===currThreadId){
     createNewChat();
+}
+
+if(response.ok){
+showToast("Thread deleted successfully","success");
+}else{
+    showToast(data.message||"something went wrong","error");
 }
 
 }catch(err){

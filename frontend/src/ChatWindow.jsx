@@ -3,11 +3,12 @@ import Chat from "./Chat";
 import "./ChatWindow.css";
 import { MyContext} from "./MyContext";
 import {ScaleLoader} from "react-spinners"
-
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 
  
 function ChatWindow(){
-    const {prompt,setPrompt,reply,setReply,currThreadId,prevChat,setPrevChat,setNewChat,showHistory,setShowHistory,user,setUser,setAllThreads}=useContext(MyContext);
+    const {prompt,setPrompt,reply,setReply,currThreadId,prevChat,setPrevChat,setNewChat,showHistory,setShowHistory,user,setUser,setAllThreads,toast,setToast,showToast}=useContext(MyContext);
     const [loading,setLoading]=useState(false);
     const [isOpen,setIsOpen]=useState(false);
     const [auth,setAuth]=useState(null);
@@ -33,10 +34,12 @@ function ChatWindow(){
 
     const getReply=async ()=>{
         if(!user){
+            showToast("Please login your account")
             setAuth("login");
         }
         setLoading(true);
         setNewChat(false);
+
 const option={
     method:"POST",
     credentials:"include",
@@ -52,8 +55,14 @@ const option={
 try{
 const response=await fetch("http://localhost:8080/api/chat",option);
 const res=await response.json();
+
 console.log(res);
+if(!response.ok){
+    showToast(res.message||"Something went wrong","error");
+    return;
+}
 setReply(res.reply);
+
 if (res.thread) {
   setAllThreads(prev => {
     const exists = prev.some(t => t.threadId === res.thread.threadId);
@@ -70,6 +79,7 @@ if (res.thread) {
 }
 }catch(err){
     console.log(err);
+    showToast(err,"error");
 }
 setLoading(false)
     }
@@ -100,9 +110,14 @@ setPrompt('')
             method:"POST",
             credentials:"include",
         });
+        if(res.ok){
+            showToast("LogOut sucessfully","success");
+
+        }
         
     }catch(err){
         console.log(err);
+        showToast(err);
     }
 
     setUser(null);
@@ -112,6 +127,7 @@ setPrompt('')
    }
 
    const handleSignup=async()=>{
+    try{
 const res=await fetch("http://localhost:8080/api/signup",{
     method:"POST",
     headers:{
@@ -123,14 +139,25 @@ email:signupdetails.email,
 password:signupdetails.password
     })
 });
+
 const data=await res.json();
+
 console.log(data);
+if(res.ok){
+showToast(data.message,"success");
+}else{
+    showToast(data.message,"error");
+}
 setAuth("login");
 setSignDetails({name:"",email:"",password:""});
 setUser(null);
+    }catch(err){
+        showToast(err);
+    }
    }
 
    const handleLogin=async ()=>{
+try{
     const res=await fetch("http://localhost:8080/api/login",{
         method:"POST",
         headers:{
@@ -142,15 +169,19 @@ setUser(null);
     const data=await res.json();
 
     if(!res.ok){
-        alert(data.message||"Login Failed");
+       
+        showToast("Invalid credentials","error");
         return;
     }
 
+    showToast("Login Successfull","success");
     console.log(data);
     setUser(data.user);
     setAuth(null)
     setLoginDetails({email:"",password:""});
-    
+}catch(err){
+    showToast(err);
+}
     
    }
 
@@ -160,6 +191,20 @@ setUser(null);
     
     return(
         <>
+<Snackbar
+open={toast.open}
+autoHideDuration={3000}
+onClose={()=>setToast({...toast,open:false})}
+anchorOrigin={{vertical:"top",horizontal:"right"}}
+>
+<Alert
+onClose={()=>setToast({...toast,open:false})}
+severity={toast.severity}
+variant="filled">
+{toast.message}
+</Alert>
+</Snackbar>
+        
         {auth &&
 <div className="overlay">
         {

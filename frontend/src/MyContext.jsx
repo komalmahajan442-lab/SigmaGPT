@@ -12,6 +12,11 @@ const [prompt,setPrompt]=useState("");
   const [allThreads,setAllThreads]=useState([]);
   const [showHistory,setShowHistory]=useState(false);
   const [user,setUser]=useState(null);
+  const [toast,setToast]=useState({
+    open:false,
+    message:null,
+    severity:null
+  });
 
   const checkLogin = async () => {
   try {
@@ -35,6 +40,10 @@ const [prompt,setPrompt]=useState("");
         checkLogin();
     },[]);
 
+    const showToast=(message,severity)=>{
+setToast({open:true,message,severity});
+    }
+
   return(
         <MyContext.Provider value={ {prompt,setPrompt,
     reply,setReply,
@@ -43,7 +52,8 @@ const [prompt,setPrompt]=useState("");
     newChat,setNewChat,
     allThreads,setAllThreads,
     showHistory,setShowHistory,
-    user,setUser,checkLogin
+    user,setUser,checkLogin,
+    toast,setToast,showToast
 }
     }>
             {children}

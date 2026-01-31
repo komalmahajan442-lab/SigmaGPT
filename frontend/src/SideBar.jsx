@@ -9,7 +9,7 @@ function SideBar(){
 
     const getAllThreads=async()=>{
         try{
-const response=await fetch("http://localhost:8080/api/thread",{
+const response=await fetch("https://sigmagpt-wb5m.onrender.com/api/thread",{
     credentials:"include",
 });
 const res=await response.json();
@@ -39,7 +39,7 @@ setCurrentThreadId(uuidv1());
     const changeThread=async (newthreadId)=>{
         setCurrentThreadId(newthreadId);
         try{
-const response=await fetch(`http://localhost:8080/api/thread/${newthreadId}`,{
+const response=await fetch(`https://sigmagpt-wb5m.onrender.com/api/thread/${newthreadId}`,{
     credentials:"include"}
 );
 console.log(response);
@@ -61,7 +61,7 @@ showToast(err.message,"error");
     const deleteThread=async(deleteThreadId)=>{
 
 try{
-const response=await fetch(`http://localhost:8080/api/thread/${deleteThreadId}`,{method:"DELETE",credentials:"include"});
+const response=await fetch(`https://sigmagpt-wb5m.onrender.com/api/thread/${deleteThreadId}`,{method:"DELETE",credentials:"include"});
 const data=await response.json();
 
 setAllThreads(prev=>prev.filter(thread=>thread.threadId!==deleteThread));

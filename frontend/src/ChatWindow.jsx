@@ -53,7 +53,7 @@ const option={
 
 }
 try{
-const response=await fetch("http://localhost:8080/api/chat",option);
+const response=await fetch("https://sigmagpt-wb5m.onrender.com/api/chat",option);
 const res=await response.json();
 
 console.log(res);
@@ -106,7 +106,7 @@ setPrompt('')
 
    const handleLogOut=async()=>{
     try{
-        const res=await fetch("http://localhost:8080/api/logout",{
+        const res=await fetch("https://sigmagpt-wb5m.onrender.com/api/logout",{
             method:"POST",
             credentials:"include",
         });
@@ -128,7 +128,7 @@ setPrompt('')
 
    const handleSignup=async()=>{
     try{
-const res=await fetch("http://localhost:8080/api/signup",{
+const res=await fetch("https://sigmagpt-wb5m.onrender.com/api/signup",{
     method:"POST",
     headers:{
         "Content-Type":"application/json"
@@ -158,7 +158,7 @@ setUser(null);
 
    const handleLogin=async ()=>{
 try{
-    const res=await fetch("http://localhost:8080/api/login",{
+    const res=await fetch("https://sigmagpt-wb5m.onrender.com/api/login",{
         method:"POST",
         headers:{
             "Content-Type":"application/json",

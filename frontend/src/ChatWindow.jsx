@@ -29,6 +29,7 @@ function ChatWindow(){
 
    const handleForm=(e)=>{
     const {name,value}=e.target;
+
     setSignDetails((prev)=>({...prev,[name]:value}))
    }
 
@@ -79,7 +80,7 @@ if (res.thread) {
 }
 }catch(err){
     console.log(err);
-    showToast(err,"error");
+    showToast(err.message||"Something went wrong","error");
 }
 setLoading(false)
     }
@@ -117,7 +118,7 @@ setPrompt('')
         
     }catch(err){
         console.log(err);
-        showToast(err);
+        showToast(err.message,"error");
     }
 
     setUser(null);
@@ -152,7 +153,7 @@ setAuth("login");
 setSignDetails({name:"",email:"",password:""});
 setUser(null);
     }catch(err){
-        showToast(err);
+        showToast(err.message||"Something went wrong","error");
     }
    }
 
@@ -180,7 +181,7 @@ try{
     setAuth(null)
     setLoginDetails({email:"",password:""});
 }catch(err){
-    showToast(err);
+    showToast(err.message||"Something went wrong","error");
 }
     
    }

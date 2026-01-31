@@ -1,6 +1,7 @@
 import "dotenv/config.js";
 import fetch from "node-fetch";
 import jwt from "jsonwebtoken";
+import "dotenv/config";
 
 
 const getOpenAPIResponse=async(message)=>{
@@ -29,6 +30,7 @@ const data=await response.json();
 return data.choices[0].message.content || "No response from SigmaGPT";
 }catch(err){
     console.log(err);
+    res.status(401).json({message:err.message});
 }
 }
 
@@ -36,16 +38,16 @@ export const auth=async(req,res,next)=>{
 const token=req.cookies.token;
 
 if(!token){
- return   res.status(401).json("token not found");
+ return   res.status(401).json({message:"token not found. Please Login or Signup"});
 }
 
 try{
-const decode=jwt.verify(token,"SECRET_KEY");
+const decode=jwt.verify(token,process.env.SECRET_KEY);
 req.userId=decode.userId;
 next();
 }catch(err){
     console.log(err);
-    return res.status(401).message("Invalid token");
+    return res.status(401).json({message:err.message||"Please Create an account to chat"});
 }
 }
 

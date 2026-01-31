@@ -6,6 +6,7 @@ import User from "../models/UserModel.js";
 import bcrypt from "bcrypt";
 import { auth } from "../utils/openAi.js";
 import jwt from "jsonwebtoken";
+import "dotenv/config";
 
 const router=express.Router();
 
@@ -15,7 +16,7 @@ router.get("/thread",auth,async(req,res)=>{
     res.json(threads);
     }catch(err){
         console.log(err);
-        res.status(500).json({error:"failed to fatch thread"});
+        res.status(500).json({message:"failed to fatch thread"});
     }
 });
 
@@ -25,13 +26,13 @@ const {threadId}=req.params;
 const thread=await Thread.findOne({threadId,user:req.userId});
 
 if(!thread){
- return   res.status(404).json("Thread not found");
+ return   res.status(404).json({message:"Thread not found"});
 }
 
 return res.status(200).json(thread.messages);
 }catch(err){
     console.log(err);
-  return  res.status(500).json({error:"failed to fetch chat "});
+  return  res.status(500).json({message:"failed to fetch chat "});
 }
 })
 
@@ -42,13 +43,13 @@ try{
 const thread=await Thread.findOneAndDelete({threadId});
 
 if(!thread){
-    res.status(404).json({error:"thread not found"});
+    res.status(404).json({message:"thread not found"});
 }
 
-res.status(200).json({success:"thread deleted sucessfully"});
+res.status(200).json({message:"thread deleted sucessfully"});
 }catch(err){
     console.log(err);
-    res.status(500).json({error:"Falied to fetch thread"});
+    res.status(500).json({message:"Falied to fetch thread"});
 }
 });
 
@@ -56,7 +57,7 @@ router.post("/chat",auth,async(req,res)=>{
     const {threadId,message}=req.body;
 
     if(!threadId||!message){
-        res.status(400).json({error:"Some fields are missing"});
+        res.status(400).json({message:"Some fields are missing"});
     }
 
     try{
@@ -87,7 +88,7 @@ res.json({reply:assistantReply,isNewThread: !thread._id, // optional
   }});
     }catch(err){
         console.log(err);
-        res.status(500).json({error:"Something went wrong"});
+        res.status(500).json({message:"Something went wrong"});
     }
 });
 
@@ -104,10 +105,10 @@ const user=new User({
 
 await user.save();
 
-res.status(201).json("User registered successfully");
+res.status(201).json({message:"User registered successfully"});
 }catch(err){
     console.log(err);
-    res.status(500).json({error:err.message});
+    res.status(500).json({message:err.message});
 }
 });
 
@@ -129,7 +130,7 @@ if(!isMatch){
 
 const token=jwt.sign(
    {userId:user._id},
-    "SECRET_KEY",
+   process.env.SECRET_KEY,
     {expiresIn:"1d"},
 )
 

@@ -35,8 +35,9 @@ function ChatWindow(){
 
     const getReply=async ()=>{
         if(!user){
-            showToast("Please login your account")
+            showToast("Please login your account","error")
             setAuth("login");
+            return;
         }
         setLoading(true);
         setNewChat(false);
@@ -278,7 +279,14 @@ auth==="login" &&
 <div className="inputbox">
 <input placeholder="Ask Anything" value={prompt} 
 onChange={(e)=>setPrompt(e.target.value)}
-onKeyDown={(e)=>e.key==="Enter"?getReply():""}
+onKeyDown={(e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    getReply();
+  }
+}}
+
+
 ></input>
 <div id="sumbit" onClick={getReply}><i class="fa-solid fa-paper-plane"></i></div>
 </div>

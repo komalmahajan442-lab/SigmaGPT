@@ -1,0 +1,15 @@
+backend/.env
+
+node_modules/
+
+build/
+dist/
+
+*.log
+logs/
+
+.DS_Store
+Thumbs.db
+
+.vscode/
+.idea/

@@ -11,7 +11,7 @@ app.use(cookieParser());
 
 app.use(express.json());
 app.use(cors({
-  origin:"https://sigmagptproject.netlify.app/",
+  origin:"https://sigmagptproject.netlify.app",
   credentials:true,
 }));
 app.use("/api",chatRoutes);

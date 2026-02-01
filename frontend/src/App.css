@@ -15,4 +15,9 @@ body{
 }
 
 
-    
+   @media(max-width:768px){
+    .main{
+min-height: 100dvh;
+max-width: 100dvw;
+    }
+   }

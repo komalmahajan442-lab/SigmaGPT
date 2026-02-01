@@ -283,7 +283,7 @@ auth==="login" &&
 <input placeholder="Ask Anything" value={prompt} 
 onChange={(e)=>setPrompt(e.target.value)}
 onKeyDown={(e) => {
-  if (e.key === "Enter"&& window.innerWidth > 768) {
+  if (e.key === "Enter") {
     e.preventDefault();
     getReply();
   }

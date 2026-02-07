@@ -154,7 +154,17 @@ color: #fff;
   pointer-events: none;
 }
 
-
+.mic{
+position: absolute;
+right: 2rem;
+margin: 1rem;
+cursor: pointer;
+height: 35px;
+width: 35px;
+display: flex;
+justify-content: center;
+align-items: center;
+}
 
 
 @media (max-width:768px) {

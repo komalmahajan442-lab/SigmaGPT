@@ -1,4 +1,4 @@
-import { useContext,useEffect,useState } from "react";
+import { useContext,useEffect,useState,useRef } from "react";
 import Chat from "./Chat";
 import "./ChatWindow.css";
 import { MyContext} from "./MyContext";
@@ -65,7 +65,7 @@ if(!response.ok){
     return;
 }
 setReply(res.reply);
-
+speakReply(res.reply);
 if (res.thread) {
   setAllThreads(prev => {
     const exists = prev.some(t => t.threadId === res.thread.threadId);
@@ -190,10 +190,76 @@ try{
     
    }
 
-   
+   const recognitionRef = useRef(null);
+   const [isListening,setIsListening]=useState(false);
+
+useEffect(() => {
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    console.log("Speech Recognition not supported");
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.lang = ""; // auto detect language
+  recognition.continuous = true;
+  recognition.interimResults = false;
+
+  recognition.onresult = (e) => {
+    const text = e.results[0][0].transcript;
+    setPrompt(text);
+    recognition.stop();
+setIsListening(false);
+setTimeout(()=>{
+getReply();
+  },300)
+  };
+
+  
 
 
-    
+  recognition.onerror = (e) => {
+    console.log("Speech error:", e.error);
+    setIsListening(false);
+  };
+
+  recognitionRef.current = recognition;
+}, []);
+
+const startVoice = () => {
+  if (!recognitionRef.current) return;
+  if(isListening){
+    recognitionRef.current.stop();
+    setIsListening(false);
+  }else{
+  recognitionRef.current.start();
+  setIsListening(true);
+  }
+};
+
+const speakReply=(text)=>{
+if(!window.SpeechSynthesis) return;
+
+const utterance=new SpeechSynthesisUtterance(text);
+utterance.lang="";
+utterance.rate=1;
+utterance.pitch=1;
+
+if(recognitionRef.current){
+    recognitionRef.current.stop();
+    setIsListening(false);
+}
+
+utterance.onend=()=>{
+    recognitionRef.current.start();
+    setIsListening(true);
+}
+
+window.speechSynthesis.speak(utterance);
+}
+
     return(
         <>
 <Snackbar
@@ -291,7 +357,9 @@ onKeyDown={(e) => {
 
 
 ></input>
+<div className="mic" onClick={startVoice}><i class="fa-solid fa-microphone"></i></div>
 <div id="sumbit" onClick={getReply}><i class="fa-solid fa-paper-plane"></i></div>
+
 </div>
 
     <p className="info">SigmaGPT can make mistakes. Check important info. See cookie preferences.</p>

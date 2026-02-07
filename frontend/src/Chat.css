@@ -30,6 +30,8 @@ max-width: 500px;
 width: fit-content;
 }
 
-.gptmsg{
-
+@media(max-width:768){
+    .chats{
+        padding: 5rem;
+    }
 }

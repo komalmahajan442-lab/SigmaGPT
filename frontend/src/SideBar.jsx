@@ -6,7 +6,7 @@ import {v1 as uuidv1} from "uuid";
 
 function SideBar(){
     const {allThreads,setAllThreads,currThreadId,setNewChat,setPrompt,setReply,setPrevChat,setCurrentThreadId,showHistory,user,showToast}=useContext(MyContext);
-
+console.log(user);
     const getAllThreads=async()=>{
         try{
 const response=await fetch("https://sigmagpt-wb5m.onrender.com/api/thread",{
@@ -111,7 +111,7 @@ showToast("Thread deleted successfully","success");
             </ul>
 
             <div className="sign">
-<p>By Komal Mahajan &hearts;</p>
+<p>By Komal Mahajan  &hearts;</p>
             </div>
         </section>
         </>

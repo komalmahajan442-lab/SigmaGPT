@@ -61,6 +61,7 @@ input{
                 rgba(0, 0, 0, 0.05) 0 4px 6px,
                 rgba(0, 0, 0, 0.05) 0 12px 3px,
                 rgba(0, 0, 0, 0.05) 0 -3px 5px;
+                overflow-y: auto;
 
 }
 

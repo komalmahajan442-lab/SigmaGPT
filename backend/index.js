@@ -10,13 +10,31 @@ const PORT=8080;
 app.use(cookieParser());
 
 app.use(express.json());
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://sigmagptproject.netlify.app"
+];
+
 app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("CORS not allowed"));
+    }
+  },
+  credentials: true
+}));
+
+/*app.use(cors({
   origin: [
-    "http://localhost:5173/",
+    "http://localhost:5173",
     "https://sigmagptproject.netlify.app"
   ],
   credentials:true,
-}));
+}));*/
+
 app.use("/api",chatRoutes);
 
 const connectDB=async()=>{

@@ -16,6 +16,12 @@ const option={
         model: "openrouter/auto",
   messages: [
     {
+        role:"system",
+        content:"You are SigmaGPT. Reply in the same language as the user. If user writes Hindi, reply in Hindi."
+    },
+    {
+       
+        
       "role": "user",
       content: message
     }

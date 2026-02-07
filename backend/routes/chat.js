@@ -136,7 +136,7 @@ const token=jwt.sign(
 
 res.cookie("token", token, {
     httpOnly: true,     
-    secure: true,      
+    secure: false,      
     sameSite: "none",
     maxAge: 24 * 60 * 60 * 1000
   });

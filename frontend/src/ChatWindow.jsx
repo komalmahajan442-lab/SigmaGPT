@@ -23,6 +23,8 @@ function ChatWindow(){
     password:""
    });
 
+   const [voiceReply,setVoiceReply]=useState(false);
+
    const handleLoginForm=(e)=>{
     setLoginDetails((prev)=>({...prev,[e.target.name]:e.target.value}))
    }
@@ -65,7 +67,11 @@ if(!response.ok){
     return;
 }
 setReply(res.reply);
+
+if(voiceReply){
 speakReply(res.reply);
+}
+
 if (res.thread) {
   setAllThreads(prev => {
     const exists = prev.some(t => t.threadId === res.thread.threadId);
@@ -229,15 +235,27 @@ getReply();
 }, []);
 
 const startVoice = () => {
+    
   if (!recognitionRef.current) return;
   if(isListening){
     recognitionRef.current.stop();
     setIsListening(false);
   }else{
+    setVoiceReply(true);
   recognitionRef.current.start();
   setIsListening(true);
   }
 };
+
+const stopVoice=()=>{
+    if(!recognitionRef.current) return;
+
+    recognitionRef.current.stop();
+    window.speechSynthesis.cancel();
+
+    setIsListening(false);
+    setVoiceReply(false);
+}
 
 const speakReply=(text)=>{
 if(!window.SpeechSynthesis) return;
@@ -247,15 +265,7 @@ utterance.lang="";
 utterance.rate=1;
 utterance.pitch=1;
 
-if(recognitionRef.current){
-    recognitionRef.current.stop();
-    setIsListening(false);
-}
 
-utterance.onend=()=>{
-    recognitionRef.current.start();
-    setIsListening(true);
-}
 
 window.speechSynthesis.speak(utterance);
 }
@@ -357,7 +367,13 @@ onKeyDown={(e) => {
 
 
 ></input>
-<div className="mic" onClick={startVoice}><i class="fa-solid fa-microphone"></i></div>
+{
+    isListening ?
+    <div className="mic" style={{color:"red",padding:"1rem"}} onClick={stopVoice}>End...</div>
+    :
+    <div className="mic"  onClick={startVoice}><i class="fa-solid fa-microphone"></i></div>
+}
+
 <div id="sumbit" onClick={getReply}><i class="fa-solid fa-paper-plane"></i></div>
 
 </div>

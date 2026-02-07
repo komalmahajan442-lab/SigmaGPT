@@ -7,7 +7,12 @@ import {v1 as uuidv1} from "uuid";
 function SideBar(){
     const {allThreads,setAllThreads,currThreadId,setNewChat,setPrompt,setReply,setPrevChat,setCurrentThreadId,showHistory,user,showToast}=useContext(MyContext);
 console.log(user);
+
     const getAllThreads=async()=>{
+        if(!user){
+setAllThreads([]);
+return;
+        }
         try{
 const response=await fetch("https://sigmagpt-wb5m.onrender.com/api/thread",{
     credentials:"include",

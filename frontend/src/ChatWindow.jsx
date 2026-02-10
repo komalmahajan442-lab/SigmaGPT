@@ -213,14 +213,17 @@ useEffect(() => {
   recognition.continuous = true;
   recognition.interimResults = false;
 
+  let silenceTimer;
+
   recognition.onresult = (e) => {
-    const text = e.results[0][0].transcript;
+    const lastResult = e.results[e.results.length-1].transcript;
+const text=lastResult[0].transcript;
     setPrompt(text);
-    recognition.stop();
-setIsListening(false);
-setTimeout(()=>{
+   
+    clearTimeout(silenceTimer);
+silenceTimer=setTimeout(()=>{
 getReply();
-  },300)
+  },1200)
   };
 
   
@@ -231,20 +234,23 @@ getReply();
     setIsListening(false);
   };
 
+  recognition.onend=()=>{
+    if(isListening){
+        recognition.start();
+    }
+  }
+
   recognitionRef.current = recognition;
 }, []);
 
 const startVoice = () => {
     
   if (!recognitionRef.current) return;
-  if(isListening){
-    recognitionRef.current.stop();
-    setIsListening(false);
-  }else{
+ 
     setVoiceReply(true);
   recognitionRef.current.start();
   setIsListening(true);
-  }
+  
 };
 
 const stopVoice=()=>{
@@ -258,7 +264,7 @@ const stopVoice=()=>{
 }
 
 const speakReply=(text)=>{
-if(!window.SpeechSynthesis) return;
+if(!voiceReply) return;
 
 const utterance=new SpeechSynthesisUtterance(text);
 utterance.lang="";

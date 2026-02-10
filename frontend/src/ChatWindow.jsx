@@ -11,6 +11,7 @@ function ChatWindow(){
     const {prompt,setPrompt,reply,setReply,currThreadId,prevChat,setPrevChat,setNewChat,showHistory,setShowHistory,user,setUser,setAllThreads,toast,setToast,showToast}=useContext(MyContext);
     const [loading,setLoading]=useState(false);
     const [isOpen,setIsOpen]=useState(false);
+    const [voiceReply,setVoiceReply]=useState(false);
     const [auth,setAuth]=useState(null);
    const [signupdetails,setSignDetails]=useState({
     name:"",
@@ -23,7 +24,7 @@ function ChatWindow(){
     password:""
    });
 
-   const [voiceReply,setVoiceReply]=useState(false);
+   
 
    const handleLoginForm=(e)=>{
     setLoginDetails((prev)=>({...prev,[e.target.name]:e.target.value}))
@@ -91,6 +92,7 @@ if (res.thread) {
     showToast(err.message||"Something went wrong","error");
 }finally{
 setLoading(false);
+
 }
     }
 
@@ -108,7 +110,7 @@ setPrevChat(prevChat=>(
 }])
 )
 }
-setPrompt('')
+setPrompt('');
     },[reply])
 
     const handleProfileClick=()=>{
@@ -197,53 +199,61 @@ try{
    }
 
    const recognitionRef = useRef(null);
+   const silenceTimerRef=useRef(null);
    const [isListening,setIsListening]=useState(false);
+   const livePromptRef=useRef(null);
 
 useEffect(() => {
   const SpeechRecognition =
     window.SpeechRecognition || window.webkitSpeechRecognition;
 
   if (!SpeechRecognition) {
-    console.log("Speech Recognition not supported");
+    alert("Speech Recognition not supported");
     return;
   }
 
   const recognition = new SpeechRecognition();
-  recognition.lang = ""; // auto detect language
+  recognition.lang = "en-IN"; // or hi-IN
   recognition.continuous = true;
   recognition.interimResults = false;
 
-  let silenceTimer;
-
   recognition.onresult = (e) => {
-    const lastResult = e.results[e.results.length-1].transcript;
-const text=lastResult[0].transcript;
-    setPrompt(text);
+    const text = e.results[e.results.length - 1][0].transcript;
+livePromptRef.current=livePromptRef.current?livePromptRef.current+" "+text:text;
+    setPrompt(livePromptRef.current);
+
+    // 🔥 silence detect
+    clearTimeout(silenceTimerRef.current);
+
    
-    clearTimeout(silenceTimer);
-silenceTimer=setTimeout(()=>{
-getReply();
-  },1200)
+
+    silenceTimerRef.current = setTimeout(() => {
+      autoSend(); // AUTO SEND
+    }, 1200);
   };
 
-  
+  // 🔁 auto restart mic (ChatGPT magic)
+  recognition.onend = () => {
+    if (isListening) {
+      recognition.start();
+    }
+  };
 
-
-  recognition.onerror = (e) => {
-    console.log("Speech error:", e.error);
+  recognition.onerror = () => {
     setIsListening(false);
   };
 
-  recognition.onend=()=>{
-    if(isListening){
-        recognition.start();
-    }
-  }
-
   recognitionRef.current = recognition;
-}, []);
+}, [isListening]);
+
 
 const startVoice = () => {
+
+    if(!user){
+        showToast("Please login to start a chat","error");
+        setAuth("login");
+        return;
+    }
     
   if (!recognitionRef.current) return;
  
@@ -256,18 +266,31 @@ const startVoice = () => {
 const stopVoice=()=>{
     if(!recognitionRef.current) return;
 
-    recognitionRef.current.stop();
+    recognitionRef.current?.stop();
+    clearTimeout(silenceTimerRef.current);
     window.speechSynthesis.cancel();
 
     setIsListening(false);
     setVoiceReply(false);
 }
 
+const autoSend = async () => {
+  if (!prompt.trim()) return;
+console.log("Auto send:- "+prompt);
+  recognitionRef.current?.stop();
+  setIsListening(false);
+
+  await getReply();
+
+  livePromptRef.current = ""; // reset
+  
+};
+
 const speakReply=(text)=>{
 if(!voiceReply) return;
 
 const utterance=new SpeechSynthesisUtterance(text);
-utterance.lang="";
+utterance.lang="en-IN";
 utterance.rate=1;
 utterance.pitch=1;
 

@@ -67,7 +67,15 @@ if(!response.ok){
     showToast(res.message||"Something went wrong","error");
     return;
 }
+
+ setPrevChat(prev => [
+      ...prev,
+      { role: "user", content: prompt },
+      { role: "assistant", content: res.reply }
+    ]);
+
 setReply(res.reply);
+setPrompt("");
 
 if(voiceReply){
 speakReply(res.reply);
@@ -96,23 +104,7 @@ setLoading(false);
 }
     }
 
-    useEffect(()=>{
-if(prompt && reply){
-    if (!reply) return;
-setPrevChat(prevChat=>(
-    [...prevChat,{
-        role:"user",
-        content:prompt
-    },
-{
-    role:"assistant",
-    content:reply
-}])
-)
-}
-setPrompt('');
-    },[reply])
-
+    
     const handleProfileClick=()=>{
         setIsOpen(!isOpen);
     }
@@ -201,7 +193,9 @@ try{
    const recognitionRef = useRef(null);
    const silenceTimerRef=useRef(null);
    const [isListening,setIsListening]=useState(false);
-   const livePromptRef=useRef(null);
+   const livePromptRef=useRef("");
+   const [volume,setVolume]=useState(0);
+ const streamRef=useRef(null);
 
 useEffect(() => {
   const SpeechRecognition =
@@ -232,69 +226,138 @@ livePromptRef.current=livePromptRef.current?livePromptRef.current+" "+text:text;
     }, 1200);
   };
 
-  // 🔁 auto restart mic (ChatGPT magic)
-  recognition.onend = () => {
-    if (isListening) {
-      recognition.start();
+  recognition.onend=()=>{
+    if(voiceReply){
+    recognition.start();
+    setIsListening(true);
     }
-  };
+  }
 
   recognition.onerror = () => {
     setIsListening(false);
   };
 
   recognitionRef.current = recognition;
-}, [isListening]);
+}, []);
 
 
-const startVoice = () => {
+const startVoice = async() => {
 
-    if(!user){
+   /* if(!user){
         showToast("Please login to start a chat","error");
         setAuth("login");
         return;
-    }
-    
-  if (!recognitionRef.current) return;
- 
+    }*/
+    livePromptRef.current="";
     setVoiceReply(true);
+
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    streamRef.current=stream;
+    const audioContext=new AudioContext();
+    const analyser=audioContext.createAnalyser();
+    const source=audioContext.createMediaStreamSource(stream);
+
+    source.connect(analyser);
+    analyser.fftSize=256;
+
+    const dataArray=new Uint8Array(analyser.frequencyBinCount);
+
+    const checkVolume=()=>{
+        analyser.getByteFrequencyData(dataArray);
+        const avg=dataArray.reduce((a,b)=>a+b,0)/dataArray.length;
+        setVolume(avg);
+        requestAnimationFrame(checkVolume);
+    };
+
+    checkVolume();
+    
   recognitionRef.current.start();
   setIsListening(true);
   
 };
 
 const stopVoice=()=>{
-    if(!recognitionRef.current) return;
+    //if(!recognitionRef.current) return;
 
     recognitionRef.current?.stop();
     clearTimeout(silenceTimerRef.current);
     window.speechSynthesis.cancel();
-
+if (streamRef.current) {
+    streamRef.current.getTracks().forEach(track => track.stop());
+    streamRef.current = null;
+  }
     setIsListening(false);
     setVoiceReply(false);
 }
 
 const autoSend = async () => {
-  if (!prompt.trim()) return;
-console.log("Auto send:- "+prompt);
+  const text = livePromptRef.current;
+
+  if (!text || !text.trim()) return;
+
   recognitionRef.current?.stop();
   setIsListening(false);
 
-  await getReply();
+  setPrompt(text); // UI only
 
-  livePromptRef.current = ""; // reset
-  
+  try {
+    setLoading(true);
+
+    const response = await fetch(
+      "https://sigmagpt-wb5m.onrender.com/api/chat",
+      {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: text,
+          threadId: currThreadId,
+        }),
+      }
+    );
+
+    const res = await response.json();
+    if (!response.ok) return;
+
+    // 👇 manually push chat
+    setPrevChat(prev => [
+      ...prev,
+      { role: "user", content: text },
+      { role: "assistant", content: res.reply }
+    ]);
+
+    setReply(res.reply);
+    if (voiceReply) speakReply(res.reply);
+    setIsListening(true);
+
+  } catch (err) {
+    console.log(err);
+  } finally {
+    setLoading(false);
+    livePromptRef.current = "";
+    setPrompt("");
+  }
 };
+
 
 const speakReply=(text)=>{
 if(!voiceReply) return;
 
+recognitionRef.current?.stop();
 const utterance=new SpeechSynthesisUtterance(text);
 utterance.lang="en-IN";
 utterance.rate=1;
 utterance.pitch=1;
 
-
+ utterance.onend = () => {
+    if (voiceReply) {
+        setTimeout(()=>{
+ recognitionRef.current?.start();
+      setIsListening(true);
+        },400);
+     
+    }
+  };
 
 window.speechSynthesis.speak(utterance);
 }
@@ -385,6 +448,13 @@ auth==="login" &&
 </ScaleLoader>
 <div className="chatInput">
 <div className="inputbox">
+     {isListening && (
+        <div className="realWave">
+<div style={{height:`${volume/2}px`}}></div>
+<div style={{height:`${volume/1.8}px`}}></div>
+<div style={{height:`${volume/2.2}px`}}></div>
+        </div>
+    )}
 <input placeholder="Ask Anything" value={prompt} 
 onChange={(e)=>setPrompt(e.target.value)}
 onKeyDown={(e) => {
@@ -395,7 +465,10 @@ onKeyDown={(e) => {
 }}
 
 
-></input>
+>
+   
+</input>
+
 {
     isListening ?
     <div className="mic" style={{color:"red",padding:"1rem"}} onClick={stopVoice}>End...</div>

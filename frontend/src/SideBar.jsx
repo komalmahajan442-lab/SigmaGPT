@@ -13,6 +13,7 @@ console.log(user);
 setAllThreads([]);
 return;
         }
+
         try{
 const response=await fetch("https://sigmagpt-wb5m.onrender.com/api/thread",{
     credentials:"include",
@@ -31,7 +32,7 @@ setAllThreads(filteredData);
 
     useEffect(()=>{
 getAllThreads();
-    },[currThreadId])
+    },[user,currThreadId])
 
     const createNewChat=()=>{
 setPrompt(""),

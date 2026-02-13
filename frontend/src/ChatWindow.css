@@ -167,7 +167,21 @@ justify-content: center;
 align-items: center;
 }
 
+.realWave{
+    display: flex;
+    gap:5px;
+align-items: end;
+height: 40px;
+position: absolute;
+z-index: 1000;
+}
 
+.realWave div{
+    width:6px;
+    background-color: #00ffcc;
+    border-radius:4px;
+    transition: height 0.1s ease;
+}
 @media (max-width:768px) {
     .his{
         display: block;

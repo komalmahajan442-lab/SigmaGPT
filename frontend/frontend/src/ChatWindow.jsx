@@ -243,11 +243,11 @@ livePromptRef.current=livePromptRef.current?livePromptRef.current+" "+text:text;
 
 const startVoice = async() => {
 
-   if(!user){
+   /* if(!user){
         showToast("Please login to start a chat","error");
         setAuth("login");
         return;
-    }
+    }*/
     livePromptRef.current="";
     setVoiceReply(true);
 
@@ -328,7 +328,7 @@ const autoSend = async () => {
 
     setReply(res.reply);
     if (voiceReply) speakReply(res.reply);
-   
+    setIsListening(true);
 
   } catch (err) {
     console.log(err);

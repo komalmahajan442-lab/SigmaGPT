@@ -30,9 +30,7 @@ setAllThreads(filteredData);
 
     }
 
-    useEffect(()=>{
-getAllThreads();
-    },[user,currThreadId,deleteThread])
+    
 
     const createNewChat=()=>{
 setPrompt(""),
@@ -86,6 +84,10 @@ showToast("Thread deleted successfully","success");
     console.log(err);
 }
     }
+
+    useEffect(()=>{
+getAllThreads();
+    },[user,currThreadId,deleteThread])
 
     useEffect(()=>{
         if(!user){

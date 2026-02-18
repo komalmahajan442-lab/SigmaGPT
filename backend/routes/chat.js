@@ -97,6 +97,18 @@ router.post("/signup",async (req,res)=>{
     const {name,email,password}=req.body;
     const hashedPassword=await bcrypt.hash(password,10);
 
+    const existinguser=User.findOne({email});
+
+    if(existinguser){
+        return res.status(400).json({message:"Email already registered "})
+    }
+
+    const emailRegex = "/^[^\s@]+@[^\s@]+\.[^\s@]+$/";
+
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    } 
+
 const user=new User({
     name:name,
     email:email,

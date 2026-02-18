@@ -32,7 +32,7 @@ setAllThreads(filteredData);
 
     useEffect(()=>{
 getAllThreads();
-    },[user,currThreadId])
+    },[user,currThreadId,deleteThread])
 
     const createNewChat=()=>{
 setPrompt(""),

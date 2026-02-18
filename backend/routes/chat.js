@@ -97,7 +97,7 @@ router.post("/signup",async (req,res)=>{
     const {name,email,password}=req.body;
     const hashedPassword=await bcrypt.hash(password,10);
 
-    const existinguser=User.findOne({email});
+    const existinguser=await User.findOne({email});
 
     if(existinguser){
         return res.status(400).json({message:"Email already registered "})

@@ -103,7 +103,7 @@ router.post("/signup",async (req,res)=>{
         return res.status(400).json({message:"Email already registered "})
     }
 
-    const emailRegex = "/^[^\s@]+@[^\s@]+\.[^\s@]+$/";
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!emailRegex.test(email)) {
       return res.status(400).json({ message: "Invalid email format" });
